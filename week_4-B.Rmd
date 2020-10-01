@@ -11,7 +11,7 @@ library(janitor)
 
 # As you can see, I have included my version of the `read_enrollment()`
 # function. Take a look! Is it similar to yours? Where does it differ? Note that
-# I have added a check at the beginning. skip_lines should always be a numer. If
+# I have added a check at the beginning. skip_lines should always be a number. If
 # it isn't, something is wrong and I should investigate was it is going on. I
 # have also restructured the function so that, instead of just being a pipe that
 # vomits out whatever tibble emerges from it, we create an object and then test
@@ -49,14 +49,35 @@ Let's continue working with the same enrollment data as Tuesday.  Recall the [of
 
 **Prompt:** Create a tibble named `classes` which includes the data from all five years in a "tidy" format. In addition to the variables produced by `read_enrollemnt()`, your tibble should include a variable named `year`.
 
+```{r}
 
+d_2019 <- read_enrollment("raw_data/class_enrollment_summary_by_term_12.20.19.xlsx")
+d_2018 <- read_enrollment("raw_data/class_enrollment_summary_by_term_10.24.18.xlsx", 2)
+d_2017 <- read_enrollment("raw_data/class_enrollment_summary_by_term_10.20.17.xlsx")
+d_2016 <- read_enrollment("raw_data/class_enrollment_summary_by_term_fall_2016.xlsx", 0)
+d_2015 <- read_enrollment("raw_data/class_enrollment_summary_by_term_fall_2015.xlsx")
+
+classes <- bind_rows(d_2015, d_2016, d_2017, d_2018, d_2019, .id = "year") %>%
+  mutate(year = as.character(as.numeric(year) + 2014))
+
+```
 
 ### Scene 2
 
 **Prompt:** Write a function called `big_classes()` whose first argument `x` requires a tibble, formatted like `classes`. It should return a tibble with the 5 highest enrollment classes in `x`. Once everyone in your group has that working, add a function argument called `my_year` which allows the user to pick a year for which she wants to know the biggest 5 courses.
 
+```{r}
 
+big_classes <- function(x, my_year) {
+  x %>%
+  filter(year == my_year) %>%
+  arrange(desc(u_grad)) %>%
+  head(5)
+}
 
+big_classes(classes, 2019)
+
+```
 
 ### Scene 3
 
@@ -64,12 +85,22 @@ Let's continue working with the same enrollment data as Tuesday.  Recall the [of
 
 * Create a tibble with a row for each year which includes a list-column named `q_enrollment` in which is stored the results of running `quantile()` on enrollment.
 
+```{r}
 
+q4 <- classes %>%
+  group_by(year) %>%
+  summarize(q_enrollment = list(quantile(u_grad)), .groups = "drop") %>%
+  #mutate(mean_25_75 = )
+
+```
 
 * You now have a tibble with two columns: `year` and `q_enrollment`. Add another column called `mean_25_75` which is the average of the 25th and 75th percentiles. (You should look at `?quantile` to determine which elements in the list these are.) 
 
+```{r}
 
 
+
+```
 
 ### Scene 4
 
